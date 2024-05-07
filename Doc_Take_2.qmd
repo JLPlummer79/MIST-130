@@ -1,0 +1,175 @@
+---
+title: "Methods"
+format: html
+editor: visual
+author: Jesse Plummer
+---
+
+# Participants (or Observations)
+
+The data that I used was the **weather.csv** which included the following variables:
+
+| Variable Name   | Type      | Description                                                             |
+|---------------|---------------|-----------------------------------------|
+| station         | character | the geographic location of the station where the data was collected     |
+| state           | character | the state (or territory) where the data was collected                   |
+| latitude        | numeric   | the latitude of the station                                             |
+| longitude       | numeric   | the longitude of the station                                            |
+| elevation       | numeric   | the height of the station (units?)                                      |
+| date            | numeric   | the date when the data was collected (year, month, day)                 |
+| temp_min        | numeric   | the minimumm temperature collected at the station (units?)              |
+| temp_max)       | numeric   | the maximum temperature collected at the station (units?)               |
+| temp_avg        | numeric   | the avergae temperature collected at the station (units?)               |
+| av_day_wind_spd | numeric   | the average daily wind speed at the station (may be incorrect) (units?) |
+| wi_dir_5sec     | numeric   | the wind direction in 5 second intervals (at the station)               |
+| wi_spd_5sec     | numeric   | the wind speed in 5 second intervals (at the station)                   |
+| snow_fall       | numeric   | the amount of snowfall recorded at the station                          |
+| snow_dep        | numeric   | the snow depth recorded at the station                                  |
+| precip          | numeric   | the amount precipitation recorded at the station                        |
+
+My hypothesis is that ***more snowfall would occur at stations above the 40th parallel.***
+
+The variables that I used in this analysis were:
+
+-   latitude: this would be used to create a clear division between data points
+
+-   station: this variable offers another way to identify snowfall data points – more graphic or remove
+
+-   state: another variable offering another way to identify snowfall data points – more graphic or remove
+
+-   snow_fall: one of the variables being analyzed that would show that the hypothesis could be verified or dismissed.
+
+-   temp_avg: another variable that demonstrates one possible explanation as to why the hypothesis could be true.
+
+## Procedure
+
+How I did the analysis:
+
+1.  Load the required libraries into RStudio
+
+```{r}
+#|label: load-packages
+#|code-summary: Packages required for analysis
+#|echo: false
+#|message: false
+#|include: false
+
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(dplyr)
+```
+
+2.  Move the data into RStudio then read the csv file into a tibble
+
+```{r}
+#| echo: false
+#| output: false
+#| include: false
+
+#load("weather.csv")
+weather <- read_csv('weather.csv')
+```
+
+3.  Add a column count to the new tibble and save it to a data frame (df0)
+
+    ```{r}
+    #|echo: false
+    #|output: false
+
+    #df0 <- weather %>%
+    #add_count(station, name = 'station_cnt') %>%
+
+    #  add_count(state, name = 'state_cnt') %>%
+
+    #  add_count(state, name = 'state_cnt') %>%
+
+    #  add_count(latitude, name = 'latitude_cnt') %>%
+
+    #  add_count(longitude, name = 'longitude_cnt') %>%
+
+    #  add_count(elevation, name = 'elevation_cnt') %>%
+
+    #  add_count(date, name = 'date_cnt') %>%
+
+    #  add_count(temp_min, name = 'temp_min_cnt') %>%
+
+    #  add_count(temp_max, name = 'temp_max_cnt') %>%
+
+    #  add_count(temp_avg, name = 'temp_ave_cnt') %>%
+
+    #  add_count(av_day_wi_spd, name = 'av_day_wi_spd_cnt') %>%
+
+    #  add_count(wi_dir_5sec, name = 'wi_dir_5sec_cnt') %>%
+
+    #  add_count(wi_spd_5sec, name = 'wi_spd_5sec_cnt') %>%
+
+    #  add_count(snow_fall, name = 'snow_fall_cnt') %>%
+
+    #  add_count(snow_dep, name = 'snow_dep_cnt') %>%
+
+    #  add_count(precip, name = 'precip_cnt')
+
+    ```
+
+4.  Make sure data is clean (remove any NAs), add a new column to the df0 data frame that differentiates above or below the 40th parallel, and save that to a new data frame, data_for_analysis.
+
+    ```{r}
+    #|label: Clean data and add new column
+    #|code-summary: omit any NAs from df0, add another column
+
+    #df0 %>%
+    #  na.omit() %>%
+    #  mutate(lat_Abv_40 = ifelse(latitude > 40, "abv", "bel")) -> data_for_model
+    ```
+
+5.  Create a data model that will show if we may accept or reject the null hypothesis
+
+    ```{r}
+    #|label: For a conclusion on the hypothesis based on p-value
+    #|code_summary: using lmer find a p-value
+     
+    #high_lat_model <- lmer(snow_fall ~ lat_Abv_40 + (1|station),
+    #                       data= data_for_model)
+    #summary(high_lat_model)
+    ```
+
+6.  The results of the summary:
+
+```         
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest'] 
+Formula: snow_fall ~ lat_Abv_40 + (1 | station)    
+Data: data_for_model  
+REML criterion at convergence: 97063.1 
+Scaled residuals:     Min     1Q Median     3Q    Max  
+                    -0.637 -0.185 -0.039 -0.008 59.716   
+  Random effects:  Groups   Name        Variance Std.Dev.  
+                  station  (Intercept) 0.002445 0.04945   
+                  Residual             0.268421 0.51809  
+                  Number of obs: 63536, groups:  station, 272  
+  Fixed effects:                
+                Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)     0.114634   0.005588 207.643785   20.52   <2e-16 *** 
+lat_Abv_40bel  -0.101701   0.007462 208.526977  -13.63   <2e-16 *** 
+--- 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1  
+Correlation of Fixed Effects:            
+            (Intr) 
+lt_Abv_40bl -0.749
+```
+
+Based on this p value we can reject the null hypothesis, and conclude that stations above the 40th parallel (latitudes above 40 degrees) have more snowfall that stations below the 40th parallel.
+
+7.  The next thing I thought about was to to give a reason why my prediction could be true. Generally speaking (through common knowledge) the higher the parallel (the higher the latitude) the lower the average temperature would be. To show this correlation, I ran a Pearson's correlation, looking for an r value that shows a correlation between the average temperature and latitude.
+
+    ```{r}
+    data_for_model %>%
+      ggplot(aes(x = temp_avg, y = latitude)) + geom_point() +
+      geom_smooth(method="lm")
+    ```
+
+8.  <div>
+
+    ## Results
+
+    </div>
